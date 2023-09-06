@@ -1,6 +1,6 @@
 # **Person project**
 ##  Contact management using Spring Boot, H2 Database in-memory, and Swagger
-### Api Documentaion by Swagger 
+### Api Documentation by Swagger 
 http://localhost:8080/
 ###   Points to consider:
 
