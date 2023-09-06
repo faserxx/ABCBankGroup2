@@ -5,7 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Person {
@@ -14,7 +18,10 @@ public class Person {
     private Long id;
     private String firstName;
     private String secondName;
-    private String addresses;
+
+    @OneToMany(mappedBy = "person")
+    private List<Address> address= new ArrayList<>();
+
     private Date dateOfBirth;
     private String phoneNumbers;
     private String personalPhoto;
@@ -24,18 +31,18 @@ public class Person {
 
     public Person(){}
 
-    public Person(String firstName, String secondName, String addresses, Date dateOfBirth, String phoneNumbers, String personalPhoto) {
+    public Person(String firstName, String secondName, Date dateOfBirth, String phoneNumbers, String personalPhoto) {
         this.firstName = firstName;
         this.secondName = secondName;
-        this.addresses = addresses;
+
         this.dateOfBirth = dateOfBirth;
         this.phoneNumbers = phoneNumbers;
         this.personalPhoto = personalPhoto;
     }
-    public Person(String firstName, String secondName, String addresses, Date dateOfBirth, String phoneNumbers) {
+    public Person(String firstName, String secondName, Date dateOfBirth, String phoneNumbers) {
         this.firstName = firstName;
         this.secondName = secondName;
-        this.addresses = addresses;
+
         this.dateOfBirth = dateOfBirth;
         this.phoneNumbers = phoneNumbers;
     }
@@ -64,12 +71,12 @@ public class Person {
         this.secondName = secondName;
     }
 
-    public String getAddresses() {
-        return this.addresses;
+    public List<Address> getAddresses() {
+        return this.address;
     }
 
-    public void setAddresses(String addresses) {
-        this.addresses = addresses;
+    public void setAddresses(List<Address> addresses) {
+        this.address = addresses;
     }
 
     public Date getDateOfBirth() {

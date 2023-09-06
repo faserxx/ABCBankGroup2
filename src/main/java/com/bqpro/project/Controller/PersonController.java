@@ -1,11 +1,11 @@
 package com.bqpro.project.Controller;
 
+import com.bqpro.project.Model.Address;
 import com.bqpro.project.Model.Person;
+import com.bqpro.project.Repository.AddressRepository;
 import com.bqpro.project.Repository.PersonRepository;
 import com.bqpro.project.Service.PersonService;
 import com.bqpro.project.Utils.FileUploadUtil;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +33,8 @@ public class PersonController {
     PersonRepository personRepository;
 
     @Autowired
+    AddressRepository addressRepository;
+
     public PersonController(PersonService personService) {
         this.personService = personService;
     }
@@ -77,8 +81,9 @@ public class PersonController {
                                           @RequestParam("secondName") String secondName,
                                           @RequestParam("dateOfBirth") Date dateOfBirth,
                                           @RequestParam("phoneNumber") String phoneNumber,
-                                          @RequestParam("address") String addresses) throws IOException {
-        Person person=new Person(firstName,secondName,phoneNumber,dateOfBirth,addresses);
+                                          @RequestParam("address") String[] addresses) throws IOException {
+
+        Person person=new Person(firstName,secondName,dateOfBirth,phoneNumber);
         String a="";
         if(file!=null){
         int index=file.getOriginalFilename().indexOf(".");
@@ -92,7 +97,21 @@ public class PersonController {
         person.setPersonalPhoto(absolute);
         }
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(personService.savePerson(person));
+            Person personsave = personService.savePerson(person);
+            if(personsave!=null)
+            {
+                List<Address> addressList = new ArrayList<Address>();
+                for (String text : addresses) {
+                    Address ad= new Address();
+                    ad.setText(text);
+                    ad.setPerson(personsave);
+                    Address addressSave = addressRepository.save(ad);
+                    addressList.add(addressSave);
+                }
+                personsave.setAddresses(addressList);
+            }
+                
+            return ResponseEntity.status(HttpStatus.OK).body(personsave);
         }
         catch (Exception e){
             e.printStackTrace();
@@ -108,6 +127,33 @@ public class PersonController {
         if (existingPerson.isPresent()) {
             person.setId(id);
             Person updatedPerson = personService.savePerson(person);
+            List<Address> existingAddress = updatedPerson.getAddresses();
+            List<Address> newsAddress = updatedPerson.getAddresses();
+            
+            for (Address add : person.getAddresses()) {
+                Iterator<Address> it = existingAddress.iterator();
+                boolean find = false;
+                while(it.hasNext()) {
+                    Address address = it.next();
+                    if(add.getId()==address.getId())
+                    {
+                        find = true;
+                        address.setText(add.getText());
+                        addressRepository.save(address);
+                    }
+                }
+                if(!find)
+                {
+                    Address ad= new Address();
+                    ad.setText(add.getText());
+                    ad.setPerson(updatedPerson);
+                    Address addressSave = addressRepository.save(ad);
+                    newsAddress.add(addressSave);
+                    
+                }
+            }
+            updatedPerson.setAddresses(newsAddress);
+
             return ResponseEntity.ok(updatedPerson);
         } else {
             return ResponseEntity.notFound().build();
