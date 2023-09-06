@@ -37,7 +37,7 @@ public class Swagger2Configuration {
         return new Docket(DocumentationType.OAS_30)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.bqpro.project.Controller"))
-                .paths(PathSelectors.ant("/persons/*"))
+                .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo());
     }
@@ -53,5 +53,7 @@ public class Swagger2Configuration {
                 "",
                 Collections.emptyList());
     }
+
+
 
 }
