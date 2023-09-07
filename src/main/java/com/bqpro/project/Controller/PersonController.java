@@ -164,6 +164,10 @@ public class PersonController {
     public ResponseEntity<Void> deletePerson(@PathVariable Long id) {
         Optional<Person> existingPerson = personService.getPersonById(id);
         if (existingPerson.isPresent()) {
+            List<Address> address= existingPerson.get().getAddresses();
+            for (Address add : address) {
+                addressRepository.delete(add);
+            }
             personService.deletePerson(id);
             return ResponseEntity.noContent().build();
         } else {
