@@ -185,11 +185,22 @@ public class PersonController {
         if (secondName != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("secondName"), secondName));
         }
-        if (addresses != null) {
+        /*if (addresses != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("addresses"), addresses));
-        }
+        }*/
 
-        return personRepository.findAll(spec);
+        List<Person> personlist= personRepository.findAll(spec);
+        List<Person> newlist= new ArrayList<>();
+        if (addresses != null)
+        {
+            for (Person person : personlist) {
+                if(personService.findAddressByPerson(person, addresses))
+                    newlist.add(person);
+            }
+        }
+        
+
+        return addresses!= null?newlist:personlist;
     }
 
     /*@GetMapping("/age-range")
